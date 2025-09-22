@@ -2,17 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongoose';
 import Complaint from '@/models/Complaint';
 import { sendNewComplaintEmail } from '@/lib/email';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
 // GET /api/complaints - Fetch all complaints
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    const role = (session?.user as any)?.role;
-    if (!session || role !== 'admin') {
-      return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
-    }
     await dbConnect();
 
     const { searchParams } = new URL(request.url);
@@ -61,10 +54,6 @@ export async function GET(request: NextRequest) {
 // POST /api/complaints - Create new complaint
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-    }
     await dbConnect();
 
     const body = await request.json();
@@ -86,7 +75,6 @@ export async function POST(request: NextRequest) {
       priority,
       email,
       customerName,
-      userId: (session.user as any).id,
       status: 'Pending',
       dateSubmitted: new Date()
     });

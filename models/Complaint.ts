@@ -9,14 +9,14 @@ export interface IComplaint extends Document {
   dateSubmitted: Date;
   email?: string;
   customerName?: string;
-  userId: mongoose.Types.ObjectId;
+  userId?: mongoose.Types.ObjectId;
 }
 
 const ComplaintSchema: Schema = new Schema({
   userId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-    required: [true, 'Complaint must be associated with a user']
+    required: false
   },
   title: {
     type: String,

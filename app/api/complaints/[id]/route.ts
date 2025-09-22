@@ -2,18 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongoose';
 import Complaint from '@/models/Complaint';
 import { sendStatusUpdateEmail } from '@/lib/email';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
 // GET /api/complaints/[id] - Get single complaint
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     await dbConnect();
 
-    const complaint = await Complaint.findById(params.id);
+    const complaint = await Complaint.findById(id);
 
     if (!complaint) {
       return NextResponse.json(
@@ -38,21 +37,17 @@ export async function GET(
 // PATCH /api/complaints/[id] - Update complaint
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    const role = (session?.user as any)?.role;
-    if (!session || role !== 'admin') {
-      return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
-    }
+    const { id } = await context.params;
     await dbConnect();
 
     const body = await request.json();
     const updates = body;
 
     // Get the current complaint to check for status changes
-    const currentComplaint = await Complaint.findById(params.id);
+    const currentComplaint = await Complaint.findById(id);
     
     if (!currentComplaint) {
       return NextResponse.json(
@@ -62,14 +57,10 @@ export async function PATCH(
     }
 
     // Update the complaint
-    const updatedComplaint = await Complaint.findByIdAndUpdate(
-      params.id,
-      updates,
-      { 
-        new: true, 
-        runValidators: true 
-      }
-    );
+    const updatedComplaint = await Complaint.findByIdAndUpdate(id, updates, {
+      new: true,
+      runValidators: true
+    });
 
     if (!updatedComplaint) {
       return NextResponse.json(
@@ -116,17 +107,13 @@ export async function PATCH(
 // DELETE /api/complaints/[id] - Delete complaint
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    const role = (session?.user as any)?.role;
-    if (!session || role !== 'admin') {
-      return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
-    }
+    const { id } = await context.params;
     await dbConnect();
 
-    const deletedComplaint = await Complaint.findByIdAndDelete(params.id);
+    const deletedComplaint = await Complaint.findByIdAndDelete(id);
 
     if (!deletedComplaint) {
       return NextResponse.json(

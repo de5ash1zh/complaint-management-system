@@ -1,9 +1,5 @@
 import Layout from '../../components/Layout';
 import AdminTable from '../../components/AdminTable';
-import AdminHeader from '../../components/AdminHeader';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { redirect } from 'next/navigation';
 import dbConnect from '@/lib/mongoose';
 import Complaint from '@/models/Complaint';
 
@@ -19,21 +15,6 @@ async function getComplaints() {
 }
 
 export default async function AdminPage() {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    redirect('/login');
-  }
-  const role = (session.user as any)?.role || 'user';
-  if (role !== 'admin') {
-    return (
-      <Layout>
-        <div className="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Access denied</h1>
-          <p className="text-gray-600">You do not have permission to view this page.</p>
-        </div>
-      </Layout>
-    );
-  }
   const complaints = await getComplaints();
 
   return (
@@ -46,7 +27,6 @@ export default async function AdminPage() {
               Manage and track all customer complaints
             </p>
           </div>
-          <AdminHeader />
           <div className="bg-white p-4 rounded-lg shadow-md">
             <div className="text-center">
               <div className="text-2xl font-bold text-blue-600">{complaints.length}</div>

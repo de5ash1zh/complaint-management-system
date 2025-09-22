@@ -1,8 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useSession } from 'next-auth/react';
-import Link from 'next/link';
 
 interface ComplaintFormData {
   title: string;
@@ -17,7 +15,6 @@ const categories = ['Service', 'Product', 'Billing', 'Technical', 'Other'];
 const priorities = ['Low', 'Medium', 'High'];
 
 export default function ComplaintForm() {
-  const { status } = useSession();
   const [formData, setFormData] = useState<ComplaintFormData>({
     title: '',
     description: '',
@@ -73,25 +70,6 @@ export default function ComplaintForm() {
       setIsSubmitting(false);
     }
   };
-
-  if (status === 'loading') {
-    return (
-      <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md text-center">
-        <div className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent align-[-0.125em]"></div>
-        <p className="mt-3 text-gray-600">Loading...</p>
-      </div>
-    );
-  }
-
-  if (status === 'unauthenticated') {
-    return (
-      <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md text-center">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Login required</h2>
-        <p className="text-gray-600">Please login to submit a complaint.</p>
-        <Link href="/login" className="inline-block mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md">Go to Login</Link>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
