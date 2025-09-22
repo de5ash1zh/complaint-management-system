@@ -1,15 +1,19 @@
 import nodemailer from 'nodemailer';
 import { IComplaint } from '../models/Complaint';
 
-// Create reusable transporter object using SMTP transport
+// Create reusable transporter object using SMTP transport (fail-safe)
 const createTransporter = () => {
+  const { EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASSWORD } = process.env as Record<string, string | undefined>;
+  if (!EMAIL_HOST || !EMAIL_PORT || !EMAIL_USER || !EMAIL_PASSWORD) {
+    return null;
+  }
   return nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: parseInt(process.env.EMAIL_PORT || '587'),
-    secure: process.env.EMAIL_PORT === '465', // true for 465, false for other ports
+    host: EMAIL_HOST,
+    port: parseInt(EMAIL_PORT || '587'),
+    secure: EMAIL_PORT === '465', // true for 465, false for other ports
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD,
+      user: EMAIL_USER,
+      pass: EMAIL_PASSWORD,
     },
   });
 };
@@ -17,6 +21,10 @@ const createTransporter = () => {
 export const sendNewComplaintEmail = async (complaint: IComplaint) => {
   try {
     const transporter = createTransporter();
+    if (!transporter) {
+      console.warn('[email] SMTP not configured. Skipping admin notification.');
+      return { success: true, skipped: true } as any;
+    }
     
     const mailOptions = {
       from: process.env.EMAIL_FROM,
@@ -104,8 +112,11 @@ export const sendStatusUpdateEmail = async (complaint: IComplaint) => {
       console.log('No customer email provided, skipping status update email');
       return { success: true, message: 'No customer email provided' };
     }
-
     const transporter = createTransporter();
+    if (!transporter) {
+      console.warn('[email] SMTP not configured. Skipping status update email.');
+      return { success: true, skipped: true } as any;
+    }
     
     const statusColors = {
       'Pending': '#6c757d',

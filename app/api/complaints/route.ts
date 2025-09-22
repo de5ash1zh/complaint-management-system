@@ -43,9 +43,9 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('Error fetching complaints:', error);
+    console.error('[GET /api/complaints] error:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch complaints' },
+      { success: false, error: 'Failed to fetch complaints', details: (error as Error).message },
       { status: 500 }
     );
   }
@@ -96,8 +96,7 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
 
   } catch (error) {
-    console.error('Error creating complaint:', error);
-    
+    console.error('[POST /api/complaints] error:', error);
     // Handle validation errors
     if ((error as any).name === 'ValidationError') {
       const validationErrors = Object.values((error as any).errors).map((err: any) => err.message);
@@ -108,7 +107,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { success: false, error: 'Failed to create complaint' },
+      { success: false, error: 'Failed to create complaint', details: (error as Error).message },
       { status: 500 }
     );
   }
