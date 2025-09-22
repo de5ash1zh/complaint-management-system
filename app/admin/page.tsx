@@ -3,6 +3,8 @@ import AdminTable from '../../components/AdminTable';
 import dbConnect from '@/lib/mongoose';
 import Complaint from '@/models/Complaint';
 
+export const dynamic = 'force-dynamic';
+
 async function getComplaints() {
   try {
     await dbConnect();

@@ -35,6 +35,7 @@ export default function AdminTable({ initialComplaints }: AdminTableProps) {
   const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Filter complaints when filters change
   useEffect(() => {
@@ -58,6 +59,20 @@ export default function AdminTable({ initialComplaints }: AdminTableProps) {
       ...prev,
       [filterType]: value
     }));
+  };
+
+  const refreshComplaints = async () => {
+    setIsRefreshing(true);
+    try {
+      const res = await fetch('/api/complaints', { cache: 'no-store' });
+      if (!res.ok) throw new Error('Failed to fetch');
+      const data = await res.json();
+      setComplaints(data.data || []);
+    } catch (e) {
+      alert('Failed to refresh complaints');
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const handleStatusUpdate = async (complaintId: string, newStatus: string) => {
@@ -141,6 +156,12 @@ export default function AdminTable({ initialComplaints }: AdminTableProps) {
 
   return (
     <div className="space-y-6">
+      {/* Header actions */}
+      <div className="flex items-center justify-end">
+        <Button variant="secondary" size="sm" onClick={refreshComplaints} disabled={isRefreshing}>
+          {isRefreshing ? 'Refreshing…' : 'Refresh'}
+        </Button>
+      </div>
       {/* Filters */}
       <div className="bg-white p-4 rounded-lg shadow-md">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Filters</h3>
