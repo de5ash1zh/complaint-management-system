@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Badge from '@/components/ui/Badge';
+import Button from '@/components/ui/Button';
 
 interface Complaint {
   _id: string;
@@ -118,23 +120,23 @@ export default function AdminTable({ initialComplaints }: AdminTableProps) {
     setIsModalOpen(false);
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'High': return 'bg-red-100 text-red-800';
-      case 'Medium': return 'bg-yellow-100 text-yellow-800';
-      case 'Low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const getPriorityBadge = (priority: string) => {
+    const map: Record<string, 'red' | 'yellow' | 'green' | 'gray'> = {
+      High: 'red',
+      Medium: 'yellow',
+      Low: 'green',
+    };
+    return <Badge color={map[priority] || 'gray'}>{priority}</Badge>;
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Pending': return 'bg-yellow-100 text-yellow-800';
-      case 'In Progress': return 'bg-blue-100 text-blue-800';
-      case 'Resolved': return 'bg-green-100 text-green-800';
-      case 'Closed': return 'bg-gray-100 text-gray-700';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const getStatusBadge = (status: string) => {
+    const map: Record<string, 'yellow' | 'blue' | 'green' | 'gray'> = {
+      Pending: 'yellow',
+      'In Progress': 'blue',
+      Resolved: 'green',
+      Closed: 'gray',
+    } as const;
+    return <Badge color={map[status] || 'gray'}>{status}</Badge>;
   };
 
   return (
@@ -236,38 +238,29 @@ export default function AdminTable({ initialComplaints }: AdminTableProps) {
                     <span className="text-sm text-gray-900">{complaint.category}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(complaint.priority)}`}>
-                      {complaint.priority}
-                    </span>
+                    {getPriorityBadge(complaint.priority)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <select
                       value={complaint.status}
                       onChange={(e) => handleStatusUpdate(complaint._id, e.target.value)}
                       disabled={isUpdating}
-                      className={`text-xs font-semibold rounded-full px-2 py-1 border-0 ${getStatusColor(complaint.status)} focus:ring-2 focus:ring-blue-500`}
+                      className={`text-xs font-semibold rounded-full px-2 py-1 border border-gray-200 focus:ring-2 focus:ring-blue-500`}
                     >
                       {statuses.map(status => (
                         <option key={status} value={status}>{status}</option>
                       ))}
                     </select>
+                    <div className="mt-1">
+                      {getStatusBadge(complaint.status)}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(complaint.dateSubmitted).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    <button
-                      onClick={() => openModal(complaint)}
-                      className="text-blue-600 hover:text-blue-900"
-                    >
-                      View
-                    </button>
-                    <button
-                      onClick={() => handleDelete(complaint._id)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      Delete
-                    </button>
+                    <Button variant="secondary" size="sm" onClick={() => openModal(complaint)}>View</Button>
+                    <Button variant="danger" size="sm" onClick={() => handleDelete(complaint._id)}>Delete</Button>
                   </td>
                 </tr>
               ))}
@@ -317,18 +310,14 @@ export default function AdminTable({ initialComplaints }: AdminTableProps) {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-700">Priority</h3>
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(selectedComplaint.priority)}`}>
-                      {selectedComplaint.priority}
-                    </span>
+                    {getPriorityBadge(selectedComplaint.priority)}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <h3 className="font-semibold text-gray-700">Status</h3>
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedComplaint.status)}`}>
-                      {selectedComplaint.status}
-                    </span>
+                    {getStatusBadge(selectedComplaint.status)}
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-700">Date Submitted</h3>
@@ -352,12 +341,7 @@ export default function AdminTable({ initialComplaints }: AdminTableProps) {
               </div>
 
               <div className="mt-6 flex justify-end">
-                <button
-                  onClick={closeModal}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-                >
-                  Close
-                </button>
+                <Button variant="secondary" onClick={closeModal}>Close</Button>
               </div>
             </div>
           </div>

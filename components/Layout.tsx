@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import BackToTop from '@/components/BackToTop';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -46,6 +47,8 @@ export default function Layout({ children }: LayoutProps) {
       <main id="main-content" role="main" className="flex-1 max-w-7xl w-full mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {children}
       </main>
+
+      <BackToTop />
 
       {/* Footer - sticky via flex layout */}
       <footer role="contentinfo" className="bg-white border-t">
